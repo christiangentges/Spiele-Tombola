@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 Spielauswahl Tombola</title>
+    <meta name="description" content="Zufallsauswahl für Spielegruppen - Jeder Spieler verteilt 10 Punkte auf Spiele">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spielauswahl">
+    <style>
+        :root {
+            --color-primary: #2180a0;
+            --color-primary-hover: #1a648f;
+            --color-bg: #fafaf8;
+            --color-surface: #ffffff;
+            --color-text: #1f2121;
+            --color-text-secondary: #62686e;
+            --color-border: #ddd;
+            --color-success: #218f6a;
+            --color-error: #c0152f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--color-border);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: var(--color-text);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9em;
+            color: var(--color-text);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+            color: var(--color-text);
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 128, 160, 0.1);
+        }
+
+        button {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: background 150ms;
+        }
+
+        button:hover {
+            background: var(--color-primary-hover);
+        }
+
+        button:active {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-secondary {
+            background: #f0f0f0;
+            color: var(--color-text);
+            margin-left: 10px;
+        }
+
+        .button-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .button-danger {
+            background: var(--color-error);
+        }
+
+        .button-danger:hover {
+            background: #a01222;
+        }
+
+        .players-list {
+            margin-top: 15px;
+        }
+
+        .player-item {
+            background: #fafaf8;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid var(--color-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-name {
+            font-weight: 500;
+        }
+
+        .remove-btn {
+            background: var(--color-error);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .remove-btn:hover {
+            background: #a01222;
+        }
+
+        .games-section {
+            grid-column: 1 / -1;
+        }
+
+        .games-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .game-card {
+            background: #fafaf8;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .game-name {
+            font-weight: 600;
+            color: var(--color-text);
+            word-break: break-word;
+        }
+
+        .game-points {
+            font-size: 2em;
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+
+        .game-delete {
+            background: #f0f0f0;
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 150ms;
+        }
+
+        .game-delete:hover {
+            background: var(--color-error);
+            color: white;
+        }
+
+        .result-section {
+            grid-column: 1 / -1;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result-box.hidden {
+            display: none;
+        }
+
+        .result-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .result-game {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .draw-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            margin-top: 15px;
+            background: var(--color-success);
+        }
+
+        .draw-button:hover {
+            background: #1a7a5f;
+        }
+
+        .draw-button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .info-box {
+            background: rgba(33, 128, 160, 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--color-text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--color-text-secondary);
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .history-box {
+            background: #fafaf8;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--color-success);
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-game {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .history-count {
+            background: var(--color-primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #fafaf8;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .validation-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .validation-status.complete {
+            background: rgba(33, 143, 106, 0.1);
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .validation-status.incomplete {
+            background: rgba(192, 21, 47, 0.1);
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+
+        .validation-status::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .player-status-list {
+            margin-top: 10px;
+        }
+
+        .player-status-item {
+            padding: 6px 0;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+        }
+
+        .status-icon.ready {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .status-icon.pending {
+            background: #f0a020;
+            color: white;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .template-btn {
+            background: #fafaf8;
+            border: 1px solid var(--color-border);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 150ms;
+            font-size: 0.85em;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .template-btn:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .share-section {
+            background: rgba(33, 128, 160, 0.08);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .share-section p {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            color: var(--color-text-secondary);
+        }
+
+        .share-btn {
+            background: var(--color-primary);
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Spielauswahl Tombola</h1>
+
+        <div class="share-section">
+            <p>📱 Speichere diese App auf deinem Startbildschirm:</p>
+            <p><strong>Safari:</strong> Teilen → Zum Startbildschirm</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Spieler Section -->
+            <div class="card">
+                <h2>👥 Spieler</h2>
+                <div class="info-box">
+                    Jeder Spieler hat 10 Punkte, um diese auf verschiedene Spiele zu verteilen.
+                </div>
+                
+                <div class="form-group">
+                    <label for="playerName">Spielername:</label>
+                    <input type="text" id="playerName" placeholder="z.B. Anna">
+                </div>
+
+                <button onclick="addPlayer()">Spieler hinzufügen</button>
+
+                <div class="players-list" id="playersList">
+                    <div class="empty-state">Noch keine Spieler hinzugefügt</div>
+                </div>
+            </div>
+
+            <!-- Spiele Section -->
+            <div class="card">
+                <h2>🎮 Spiele</h2>
+                <div class="info-box">
+                    Tragen Sie hier alle verfügbaren Spiele ein.
+                </div>
+
+                <div class="form-group">
+                    <label for="gameName">Spielname:</label>
+                    <input type="text" id="gameName" placeholder="z.B. Catan">
+                </div>
+
+                <button onclick="addGame()">Spiel hinzufügen</button>
+
+                <div class="games-list" id="gamesList">
+                    <div class="empty-state">Noch keine Spiele hinzugefügt</div>
+                </div>
+            </div>
+
+            <!-- Punkte Section -->
+            <div class="card games-section">
+                <h2>⭐ Punkte verteilen</h2>
+                <div class="info-box">
+                    Wählen Sie einen Spieler und verteilen Sie dann die 10 Punkte auf die Spiele.
+                </div>
+
+                <div class="form-group">
+                    <label for="selectedPlayer">Spieler auswählen:</label>
+                    <select id="selectedPlayer" onchange="loadPlayerPoints()">
+                        <option value="">-- Spieler auswählen --</option>
+                    </select>
+                </div>
+
+                <div id="pointsArea" style="display: none;">
+                    <div class="info-box">
+                        Verbleibende Punkte: <strong id="remainingPoints">10</strong> / 10
+                    </div>
+
+                    <div id="pointsFields"></div>
+
+                    <button onclick="savePlayerPoints()" style="margin-top: 15px;">Punkte speichern</button>
+                </div>
+
+                <div id="noPlayersWarning" class="empty-state">
+                    Bitte fügen Sie zunächst Spieler und Spiele hinzu.
+                </div>
+            </div>
+
+            <!-- Ziehung Section -->
+            <div class="card result-section">
+                <h2>🎯 Auslosung</h2>
+                
+                <div id="validationStatus"></div>
+
+                <button class="draw-button" onclick="drawGame()" id="drawButton" disabled>
+                    Spiel auslosen
+                </button>
+
+                <div class="result-box hidden" id="resultBox">
+                    <div class="result-label">🎉 Das nächste Spiel ist:</div>
+                    <div class="result-game" id="resultGame"></div>
+                </div>
+            </div>
+
+            <!-- Verlauf Section -->
+            <div class="card result-section">
+                <h2>📋 Verlauf & Statistiken</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Auslosungen gesamt</div>
+                        <div class="stat-value" id="totalDraws">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Unterschiedliche Spiele</div>
+                        <div class="stat-value" id="uniqueGames">0</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 1em;">🎮 Häufigkeit der Auslosungen:</h3>
+                    <div id="historyBox" class="history-box">
+                        <div class="empty-state" style="padding: 10px;">Noch keine Auslosungen</div>
+                    </div>
+                </div>
+
+                <button onclick="resetHistory()" class="button-secondary" style="width: 100%; margin-top: 15px;">
+                    Verlauf zurücksetzen
+                </button>
+            </div>
+
+            <!-- Templates Section -->
+            <div class="card result-section">
+                <h2>📚 Schnell-Templates</h2>
+                <div class="info-box">
+                    Vordefinierte Spiele schnell laden.
+                </div>
+
+                <div class="template-grid">
+                    <button class="template-btn" onclick="loadTemplate('classic')">🎲 Klassiker</button>
+                    <button class="template-btn" onclick="loadTemplate('strategy')">♟️ Strategie</button>
+                    <button class="template-btn" onclick="loadTemplate('party')">🎉 Party</button>
+                    <button class="template-btn" onclick="loadTemplate('family')">👨‍👩‍👧‍👦 Familie</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        let games = [];
+        let playerPoints = {};
+        let drawHistory = [];
+
+        const templates = {
+            classic: ['Catan', 'Carcassonne', 'Ticket to Ride', 'Puerto Rico', 'Agricola'],
+            strategy: ['Brass', 'Twilight Struggle', 'Splendor', 'Innovation', 'Power Grid'],
+            party: ['Activity', 'Stadt Land Fluss', 'Kniffelblock', 'Phase 10', 'Knack'],
+            family: ['Kniffel', 'Mensch ärgere dich nicht', 'Rommé', 'Knack', 'Wizard']
+        };
+
+        function addPlayer() {
+            const input = document.getElementById('playerName');
+            const name = input.value.trim();
+
+            if (!name) {
+                alert('Bitte Spielernamen eingeben');
+                return;
+            }
+
+            if (players.includes(name)) {
+                alert('Spieler existiert bereits');
+                return;
+            }
+
+            players.push(name);
+            playerPoints[name] = {};
+            games.forEach(game => {
+                playerPoints[name][game] = 0;
+            });
+
+            input.value = '';
+            updatePlayersDisplay();
+            updatePlayerSelect();
+            checkDrawButtonState();
+            saveData();
+        }
+
+        function removePlayer(name) {
+            players = players.filter(p => p !== name);
+            delete playerPoints[name];
+            updatePlayersDisplay();
+            updatePlayerSelect();
+            checkDrawButtonState();
+            saveData();
+        }
+
+        function updatePlayersDisplay() {
+            const list = document.getElementById('playersList');
+            if (players.length === 0) {
+                list.innerHTML = '<div class="empty-state">Noch keine Spieler hinzugefügt</div>';
+                return;
+            }
+
+            list.innerHTML = players.map(player => `
+                <div class="player-item">
+                    <span class="player-name">${player}</span>
+                    <button class="remove-btn" onclick="removePlayer('${player}')">Löschen</button>
+                </div>
+            `).join('');
+        }
+
+        function addGame() {
+            const input = document.getElementById('gameName');
+            const name = input.value.trim();
+
+            if (!name) {
+                alert('Bitte Spielname eingeben');
+                return;
+            }
+
+            if (games.includes(name)) {
+                alert('Spiel existiert bereits');
+                return;
+            }
+
+            games.push(name);
+            
+            players.forEach(player => {
+                playerPoints[player][name] = 0;
+            });
+
+            input.value = '';
+            updateGamesDisplay();
+            checkDrawButtonState();
+            saveData();
+        }
+
+        function removeGame(name) {
+            games = games.filter(g => g !== name);
+            players.forEach(player => {
+                delete playerPoints[player][name];
+            });
+            updateGamesDisplay();
+            checkDrawButtonState();
+            saveData();
+        }
+
+        function updateGamesDisplay() {
+            const list = document.getElementById('gamesList');
+            if (games.length === 0) {
+                list.innerHTML = '<div class="empty-state">Noch keine Spiele hinzugefügt</div>';
+                return;
+            }
+
+            list.innerHTML = games.map(game => {
+                const totalPoints = players.reduce((sum, player) => sum + (playerPoints[player][game] || 0), 0);
+                return `
+                    <div class="game-card">
+                        <div class="game-name">${game}</div>
+                        <div class="game-points">${totalPoints}</div>
+                        <button class="game-delete" onclick="removeGame('${game}')">Löschen</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updatePlayerSelect() {
+            const select = document.getElementById('selectedPlayer');
+            const warning = document.getElementById('noPlayersWarning');
+            const pointsArea = document.getElementById('pointsArea');
+
+            select.innerHTML = '<option value="">-- Spieler auswählen --</option>';
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player;
+                option.textContent = player;
+                select.appendChild(option);
+            });
+
+            if (players.length === 0 || games.length === 0) {
+                warning.style.display = 'block';
+                pointsArea.style.display = 'none';
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
+        function loadPlayerPoints() {
+            const select = document.getElementById('selectedPlayer');
+            const player = select.value;
+            const pointsArea = document.getElementById('pointsArea');
+
+            if (!player) {
+                pointsArea.style.display = 'none';
+                return;
+            }
+
+            const fieldsHtml = games.map(game => {
+                const points = playerPoints[player][game] || 0;
+                return `
+                    <div class="form-group">
+                        <label for="points_${game}">${game}:</label>
+                        <input type="number" id="points_${game}" min="0" max="10" value="${points}" 
+                               onchange="updateRemainingPoints()">
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('pointsFields').innerHTML = fieldsHtml;
+            pointsArea.style.display = 'block';
+            updateRemainingPoints();
+        }
+
+        function updateRemainingPoints() {
+            let total = 0;
+            games.forEach(game => {
+                const input = document.getElementById(`points_${game}`);
+                total += parseInt(input.value) || 0;
+            });
+
+            const remaining = Math.max(0, 10 - total);
+            document.getElementById('remainingPoints').textContent = remaining;
+
+            if (total > 10) {
+                alert('Maximale Punktzahl ist 10!');
+                const inputs = document.querySelectorAll('#pointsFields input');
+                inputs.forEach(input => {
+                    let newValue = parseInt(input.value) || 0;
+                    if (newValue > 10) input.value = 10;
+                });
+                updateRemainingPoints();
+            }
+        }
+
+        function savePlayerPoints() {
+            const select = document.getElementById('selectedPlayer');
+            const player = select.value;
+
+            if (!player) return;
+
+            let total = 0;
+            games.forEach(game => {
+                const input = document.getElementById(`points_${game}`);
+                const points = parseInt(input.value) || 0;
+                playerPoints[player][game] = Math.min(points, 10);
+                total += playerPoints[player][game];
+            });
+
+            if (total > 10) {
+                alert('Gesamtpunkte dürfen 10 nicht überschreiten!');
+                return;
+            }
+
+            alert('Punkte für ' + player + ' gespeichert!');
+            updateGamesDisplay();
+            updateValidationStatus();
+            checkDrawButtonState();
+            saveData();
+        }
+
+        function checkDrawButtonState() {
+            const button = document.getElementById('drawButton');
+            const hasValidData = players.length > 0 && games.length > 0;
+            
+            let totalDistributed = 0;
+            players.forEach(player => {
+                games.forEach(game => {
+                    totalDistributed += playerPoints[player][game] || 0;
+                });
+            });
+
+            button.disabled = !hasValidData || totalDistributed === 0;
+        }
+
+        function drawGame() {
+            const gameWeights = {};
+            games.forEach(game => {
+                gameWeights[game] = 0;
+            });
+
+            players.forEach(player => {
+                games.forEach(game => {
+                    gameWeights[game] += playerPoints[player][game] || 0;
+                });
+            });
+
+            const validGames = games.filter(g => gameWeights[g] > 0);
+
+            if (validGames.length === 0) {
+                alert('Keine Spiele mit Punkten verfügbar!');
+                return;
+            }
+
+            const weights = validGames.map(g => gameWeights[g]);
+            const selectedGame = weightedChoice(validGames, weights);
+
+            drawHistory.push(selectedGame);
+            
+            const resultBox = document.getElementById('resultBox');
+            const resultGame = document.getElementById('resultGame');
+            resultGame.textContent = selectedGame;
+            resultBox.classList.remove('hidden');
+
+            updateStatistics();
+            saveData();
+        }
+
+        function weightedChoice(items, weights) {
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+
+            for (let i = 0; i < items.length; i++) {
+                random -= weights[i];
+                if (random <= 0) {
+                    return items[i];
+                }
+            }
+
+            return items[items.length - 1];
+        }
+
+        function validateAllPlayers() {
+            if (players.length === 0 || games.length === 0) return false;
+
+            return players.every(player => {
+                const totalPoints = games.reduce((sum, game) => {
+                    return sum + (playerPoints[player][game] || 0);
+                }, 0);
+                return totalPoints > 0;
+            });
+        }
+
+        function updateValidationStatus() {
+            const statusDiv = document.getElementById('validationStatus');
+            const isValid = validateAllPlayers();
+
+            if (players.length === 0 || games.length === 0) {
+                statusDiv.innerHTML = `
+                    <div class="validation-status incomplete">
+                        ⚠️ Setup nicht vollständig
+                    </div>
+                `;
+                return;
+            }
+
+            const statusList = players.map(player => {
+                const totalPoints = games.reduce((sum, game) => {
+                    return sum + (playerPoints[player][game] || 0);
+                }, 0);
+                const isReady = totalPoints > 0;
+                return `
+                    <div class="player-status-item">
+                        <div class="status-icon ${isReady ? 'ready' : 'pending'}">
+                            ${isReady ? '✓' : '○'}
+                        </div>
+                        <span>${player}: ${totalPoints}/10 Punkte</span>
+                    </div>
+                `;
+            }).join('');
+
+            if (isValid) {
+                statusDiv.innerHTML = `
+                    <div class="validation-status complete">
+                        ✓ Alle Spieler bereit - Auslosung möglich!
+                    </div>
+                    <div class="player-status-list">${statusList}</div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="validation-status incomplete">
+                        ⚠️ Einige Spieler haben noch keine Punkte verteilt
+                    </div>
+                    <div class="player-status-list">${statusList}</div>
+                `;
+            }
+        }
+
+        function updateStatistics() {
+            const frequency = {};
+            drawHistory.forEach(game => {
+                frequency[game] = (frequency[game] || 0) + 1;
+            });
+
+            const sorted = Object.entries(frequency)
+                .sort((a, b) => b[1] - a[1]);
+
+            document.getElementById('totalDraws').textContent = drawHistory.length;
+            document.getElementById('uniqueGames').textContent = Object.keys(frequency).length;
+
+            const historyBox = document.getElementById('historyBox');
+            if (sorted.length === 0) {
+                historyBox.innerHTML = '<div class="empty-state" style="padding: 10px;">Noch keine Auslosungen</div>';
+            } else {
+                historyBox.innerHTML = sorted.map(([game, count]) => `
+                    <div class="history-item">
+                        <span class="history-game">${game}</span>
+                        <span class="history-count">${count}x</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function resetHistory() {
+            if (confirm('Verlauf wirklich zurücksetzen?')) {
+                drawHistory = [];
+                updateStatistics();
+                saveData();
+            }
+        }
+
+        function loadTemplate(templateName) {
+            if (games.length > 0 && !confirm('Vorhandene Spiele werden ersetzt. Fortfahren?')) {
+                return;
+            }
+
+            const templateGames = templates[templateName];
+            games = [...templateGames];
+            playerPoints = {};
+            
+            players.forEach(player => {
+                playerPoints[player] = {};
+                games.forEach(game => {
+                    playerPoints[player][game] = 0;
+                });
+            });
+
+            updateGamesDisplay();
+            updatePlayerSelect();
+            updateValidationStatus();
+            updateStatistics();
+            checkDrawButtonState();
+            saveData();
+        }
+
+        function saveData() {
+            const data = {
+                players,
+                games,
+                playerPoints,
+                drawHistory
+            };
+            localStorage.setItem('spielauswahl_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('spielauswahl_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                players = data.players || [];
+                games = data.games || [];
+                playerPoints = data.playerPoints || {};
+                drawHistory = data.drawHistory || [];
+            }
+        }
+
+        window.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (document.activeElement.id === 'playerName') {
+                    addPlayer();
+                } else if (document.activeElement.id === 'gameName') {
+                    addGame();
+                }
+            }
+        });
+
+        loadData();
+        updatePlayersDisplay();
+        updatePlayerSelect();
+        updateValidationStatus();
+        updateStatistics();
+    </script>
+</body>
+</html>
