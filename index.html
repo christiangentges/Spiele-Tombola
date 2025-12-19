@@ -140,14 +140,6 @@
             background: #e0e0e0;
         }
 
-        .button-danger {
-            background: var(--color-error);
-        }
-
-        .button-danger:hover {
-            background: #a01222;
-        }
-
         .players-list {
             margin-top: 15px;
         }
@@ -453,10 +445,45 @@
             color: var(--color-text-secondary);
         }
 
-        .share-btn {
+        .points-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .points-button {
             background: var(--color-primary);
-            padding: 8px 12px;
-            font-size: 0.85em;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 150ms;
+        }
+
+        .points-button:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .points-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .points-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--color-primary);
+            min-width: 30px;
+            text-align: center;
         }
     </style>
 </head>
@@ -741,7 +768,7 @@
             const select = document.getElementById('selectedPlayer');
             const player = select.value;
             const pointsArea = document.getElementById('pointsArea');
-
+/Users/christiangentges/Library/Mobile Documents/com~apple~CloudDocs/Downloads/index.html
             if (!player) {
                 pointsArea.style.display = 'none';
                 return;
@@ -751,9 +778,12 @@
                 const points = playerPoints[player][game] || 0;
                 return `
                     <div class="form-group">
-                        <label for="points_${game}">${game}:</label>
-                        <input type="number" id="points_${game}" min="0" max="10" value="${points}" 
-                               onchange="updateRemainingPoints()">
+                        <label>${game}:</label>
+                        <div class="points-input-group">
+                            <button class="points-button" onclick="decreasePoints('${game}')">−</button>
+                            <span class="points-value" id="points_display_${game}">${points}</span>
+                            <button class="points-button" onclick="increasePoints('${game}')">+</button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -763,11 +793,37 @@
             updateRemainingPoints();
         }
 
+        function increasePoints(game) {
+            const select = document.getElementById('selectedPlayer');
+            const player = select.value;
+            const current = playerPoints[player][game] || 0;
+            
+            if (current < 10) {
+                playerPoints[player][game] = current + 1;
+                document.getElementById(`points_display_${game}`).textContent = playerPoints[player][game];
+                updateRemainingPoints();
+            }
+        }
+
+        function decreasePoints(game) {
+            const select = document.getElementById('selectedPlayer');
+            const player = select.value;
+            const current = playerPoints[player][game] || 0;
+            
+            if (current > 0) {
+                playerPoints[player][game] = current - 1;
+                document.getElementById(`points_display_${game}`).textContent = playerPoints[player][game];
+                updateRemainingPoints();
+            }
+        }
+
         function updateRemainingPoints() {
+            const select = document.getElementById('selectedPlayer');
+            const player = select.value;
+            
             let total = 0;
             games.forEach(game => {
-                const input = document.getElementById(`points_${game}`);
-                total += parseInt(input.value) || 0;
+                total += playerPoints[player][game] || 0;
             });
 
             const remaining = Math.max(0, 10 - total);
@@ -775,12 +831,6 @@
 
             if (total > 10) {
                 alert('Maximale Punktzahl ist 10!');
-                const inputs = document.querySelectorAll('#pointsFields input');
-                inputs.forEach(input => {
-                    let newValue = parseInt(input.value) || 0;
-                    if (newValue > 10) input.value = 10;
-                });
-                updateRemainingPoints();
             }
         }
 
@@ -792,8 +842,7 @@
 
             let total = 0;
             games.forEach(game => {
-                const input = document.getElementById(`points_${game}`);
-                const points = parseInt(input.value) || 0;
+                const points = playerPoints[player][game] || 0;
                 playerPoints[player][game] = Math.min(points, 10);
                 total += playerPoints[player][game];
             });
