@@ -653,7 +653,7 @@
 
             players.push(name);
             playerPoints[name] = {};
-            games.forEach(game => {
+            games.forEach(function(game) {
                 playerPoints[name][game] = 0;
             });
 
@@ -665,7 +665,7 @@
         }
 
         function removePlayer(name) {
-            players = players.filter(p => p !== name);
+            players = players.filter(function(p) { return p !== name; });
             delete playerPoints[name];
             updatePlayersDisplay();
             updatePlayerSelect();
@@ -680,12 +680,12 @@
                 return;
             }
 
-            list.innerHTML = players.map(player => `
-                <div class="player-item">
-                    <span class="player-name">${player}</span>
-                    <button class="remove-btn" onclick="removePlayer('${player}')">Löschen</button>
-                </div>
-            `).join('');
+            let html = '';
+            for (let i = 0; i < players.length; i++) {
+                const player = players[i];
+                html += '<div class="player-item"><span class="player-name">' + player + '</span><button class="remove-btn" onclick="removePlayer(\'' + player + '\')">Löschen</button></div>';
+            }
+            list.innerHTML = html;
         }
 
         function addGame() {
@@ -704,7 +704,7 @@
 
             games.push(name);
             
-            players.forEach(player => {
+            players.forEach(function(player) {
                 playerPoints[player][name] = 0;
             });
 
@@ -715,8 +715,8 @@
         }
 
         function removeGame(name) {
-            games = games.filter(g => g !== name);
-            players.forEach(player => {
+            games = games.filter(function(g) { return g !== name; });
+            players.forEach(function(player) {
                 delete playerPoints[player][name];
             });
             updateGamesDisplay();
@@ -731,16 +731,15 @@
                 return;
             }
 
-            list.innerHTML = games.map(game => {
-                const totalPoints = players.reduce((sum, player) => sum + (playerPoints[player][game] || 0), 0);
-                return `
-                    <div class="game-card">
-                        <div class="game-name">${game}</div>
-                        <div class="game-points">${totalPoints}</div>
-                        <button class="game-delete" onclick="removeGame('${game}')">Löschen</button>
-                    </div>
-                `;
-            }).join('');
+            let html = '';
+            for (let i = 0; i < games.length; i++) {
+                const game = games[i];
+                const totalPoints = players.reduce(function(sum, player) { 
+                    return sum + (playerPoints[player][game] || 0); 
+                }, 0);
+                html += '<div class="game-card"><div class="game-name">' + game + '</div><div class="game-points">' + totalPoints + '</div><button class="game-delete" onclick="removeGame(\'' + game + '\')">Löschen</button></div>';
+            }
+            list.innerHTML = html;
         }
 
         function updatePlayerSelect() {
@@ -749,12 +748,12 @@
             const pointsArea = document.getElementById('pointsArea');
 
             select.innerHTML = '<option value="">-- Spieler auswählen --</option>';
-            players.forEach(player => {
+            for (let i = 0; i < players.length; i++) {
                 const option = document.createElement('option');
-                option.value = player;
-                option.textContent = player;
+                option.value = players[i];
+                option.textContent = players[i];
                 select.appendChild(option);
-            });
+            }
 
             if (players.length === 0 || games.length === 0) {
                 warning.style.display = 'block';
@@ -768,25 +767,18 @@
             const select = document.getElementById('selectedPlayer');
             const player = select.value;
             const pointsArea = document.getElementById('pointsArea');
-/Users/christiangentges/Library/Mobile Documents/com~apple~CloudDocs/Downloads/index.html
+
             if (!player) {
                 pointsArea.style.display = 'none';
                 return;
             }
 
-            const fieldsHtml = games.map(game => {
+            let fieldsHtml = '';
+            for (let i = 0; i < games.length; i++) {
+                const game = games[i];
                 const points = playerPoints[player][game] || 0;
-                return `
-                    <div class="form-group">
-                        <label>${game}:</label>
-                        <div class="points-input-group">
-                            <button class="points-button" onclick="decreasePoints('${game}')">−</button>
-                            <span class="points-value" id="points_display_${game}">${points}</span>
-                            <button class="points-button" onclick="increasePoints('${game}')">+</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                fieldsHtml += '<div class="form-group"><label>' + game + ':</label><div class="points-input-group"><button class="points-button" onclick="decreasePoints(\'' + game + '\')">−</button><span class="points-value" id="points_display_' + game + '">' + points + '</span><button class="points-button" onclick="increasePoints(\'' + game + '\')">+</button></div></div>';
+            }
 
             document.getElementById('pointsFields').innerHTML = fieldsHtml;
             pointsArea.style.display = 'block';
@@ -800,7 +792,7 @@
             
             if (current < 10) {
                 playerPoints[player][game] = current + 1;
-                document.getElementById(`points_display_${game}`).textContent = playerPoints[player][game];
+                document.getElementById('points_display_' + game).textContent = playerPoints[player][game];
                 updateRemainingPoints();
             }
         }
@@ -812,7 +804,7 @@
             
             if (current > 0) {
                 playerPoints[player][game] = current - 1;
-                document.getElementById(`points_display_${game}`).textContent = playerPoints[player][game];
+                document.getElementById('points_display_' + game).textContent = playerPoints[player][game];
                 updateRemainingPoints();
             }
         }
@@ -822,16 +814,12 @@
             const player = select.value;
             
             let total = 0;
-            games.forEach(game => {
-                total += playerPoints[player][game] || 0;
-            });
+            for (let i = 0; i < games.length; i++) {
+                total += playerPoints[player][games[i]] || 0;
+            }
 
             const remaining = Math.max(0, 10 - total);
             document.getElementById('remainingPoints').textContent = remaining;
-
-            if (total > 10) {
-                alert('Maximale Punktzahl ist 10!');
-            }
         }
 
         function savePlayerPoints() {
@@ -841,11 +829,12 @@
             if (!player) return;
 
             let total = 0;
-            games.forEach(game => {
+            for (let i = 0; i < games.length; i++) {
+                const game = games[i];
                 const points = playerPoints[player][game] || 0;
                 playerPoints[player][game] = Math.min(points, 10);
                 total += playerPoints[player][game];
-            });
+            }
 
             if (total > 10) {
                 alert('Gesamtpunkte dürfen 10 nicht überschreiten!');
@@ -864,35 +853,35 @@
             const hasValidData = players.length > 0 && games.length > 0;
             
             let totalDistributed = 0;
-            players.forEach(player => {
-                games.forEach(game => {
-                    totalDistributed += playerPoints[player][game] || 0;
-                });
-            });
+            for (let i = 0; i < players.length; i++) {
+                for (let j = 0; j < games.length; j++) {
+                    totalDistributed += playerPoints[players[i]][games[j]] || 0;
+                }
+            }
 
             button.disabled = !hasValidData || totalDistributed === 0;
         }
 
         function drawGame() {
             const gameWeights = {};
-            games.forEach(game => {
-                gameWeights[game] = 0;
-            });
+            for (let i = 0; i < games.length; i++) {
+                gameWeights[games[i]] = 0;
+            }
 
-            players.forEach(player => {
-                games.forEach(game => {
-                    gameWeights[game] += playerPoints[player][game] || 0;
-                });
-            });
+            for (let i = 0; i < players.length; i++) {
+                for (let j = 0; j < games.length; j++) {
+                    gameWeights[games[j]] += playerPoints[players[i]][games[j]] || 0;
+                }
+            }
 
-            const validGames = games.filter(g => gameWeights[g] > 0);
+            const validGames = games.filter(function(g) { return gameWeights[g] > 0; });
 
             if (validGames.length === 0) {
                 alert('Keine Spiele mit Punkten verfügbar!');
                 return;
             }
 
-            const weights = validGames.map(g => gameWeights[g]);
+            const weights = validGames.map(function(g) { return gameWeights[g]; });
             const selectedGame = weightedChoice(validGames, weights);
 
             drawHistory.push(selectedGame);
@@ -907,7 +896,7 @@
         }
 
         function weightedChoice(items, weights) {
-            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            const totalWeight = weights.reduce(function(a, b) { return a + b; }, 0);
             let random = Math.random() * totalWeight;
 
             for (let i = 0; i < items.length; i++) {
@@ -923,12 +912,14 @@
         function validateAllPlayers() {
             if (players.length === 0 || games.length === 0) return false;
 
-            return players.every(player => {
-                const totalPoints = games.reduce((sum, game) => {
-                    return sum + (playerPoints[player][game] || 0);
-                }, 0);
-                return totalPoints > 0;
-            });
+            for (let i = 0; i < players.length; i++) {
+                let totalPoints = 0;
+                for (let j = 0; j < games.length; j++) {
+                    totalPoints += playerPoints[players[i]][games[j]] || 0;
+                }
+                if (totalPoints === 0) return false;
+            }
+            return true;
         }
 
         function updateValidationStatus() {
@@ -936,54 +927,36 @@
             const isValid = validateAllPlayers();
 
             if (players.length === 0 || games.length === 0) {
-                statusDiv.innerHTML = `
-                    <div class="validation-status incomplete">
-                        ⚠️ Setup nicht vollständig
-                    </div>
-                `;
+                statusDiv.innerHTML = '<div class="validation-status incomplete">⚠️ Setup nicht vollständig</div>';
                 return;
             }
 
-            const statusList = players.map(player => {
-                const totalPoints = games.reduce((sum, game) => {
-                    return sum + (playerPoints[player][game] || 0);
-                }, 0);
+            let statusList = '';
+            for (let i = 0; i < players.length; i++) {
+                const player = players[i];
+                let totalPoints = 0;
+                for (let j = 0; j < games.length; j++) {
+                    totalPoints += playerPoints[player][games[j]] || 0;
+                }
                 const isReady = totalPoints > 0;
-                return `
-                    <div class="player-status-item">
-                        <div class="status-icon ${isReady ? 'ready' : 'pending'}">
-                            ${isReady ? '✓' : '○'}
-                        </div>
-                        <span>${player}: ${totalPoints}/10 Punkte</span>
-                    </div>
-                `;
-            }).join('');
+                statusList += '<div class="player-status-item"><div class="status-icon ' + (isReady ? 'ready' : 'pending') + '">' + (isReady ? '✓' : '○') + '</div><span>' + player + ': ' + totalPoints + '/10 Punkte</span></div>';
+            }
 
             if (isValid) {
-                statusDiv.innerHTML = `
-                    <div class="validation-status complete">
-                        ✓ Alle Spieler bereit - Auslosung möglich!
-                    </div>
-                    <div class="player-status-list">${statusList}</div>
-                `;
+                statusDiv.innerHTML = '<div class="validation-status complete">✓ Alle Spieler bereit - Auslosung möglich!</div><div class="player-status-list">' + statusList + '</div>';
             } else {
-                statusDiv.innerHTML = `
-                    <div class="validation-status incomplete">
-                        ⚠️ Einige Spieler haben noch keine Punkte verteilt
-                    </div>
-                    <div class="player-status-list">${statusList}</div>
-                `;
+                statusDiv.innerHTML = '<div class="validation-status incomplete">⚠️ Einige Spieler haben noch keine Punkte verteilt</div><div class="player-status-list">' + statusList + '</div>';
             }
         }
 
         function updateStatistics() {
             const frequency = {};
-            drawHistory.forEach(game => {
+            for (let i = 0; i < drawHistory.length; i++) {
+                const game = drawHistory[i];
                 frequency[game] = (frequency[game] || 0) + 1;
-            });
+            }
 
-            const sorted = Object.entries(frequency)
-                .sort((a, b) => b[1] - a[1]);
+            const sorted = Object.entries(frequency).sort(function(a, b) { return b[1] - a[1]; });
 
             document.getElementById('totalDraws').textContent = drawHistory.length;
             document.getElementById('uniqueGames').textContent = Object.keys(frequency).length;
@@ -992,12 +965,11 @@
             if (sorted.length === 0) {
                 historyBox.innerHTML = '<div class="empty-state" style="padding: 10px;">Noch keine Auslosungen</div>';
             } else {
-                historyBox.innerHTML = sorted.map(([game, count]) => `
-                    <div class="history-item">
-                        <span class="history-game">${game}</span>
-                        <span class="history-count">${count}x</span>
-                    </div>
-                `).join('');
+                let html = '';
+                for (let i = 0; i < sorted.length; i++) {
+                    html += '<div class="history-item"><span class="history-game">' + sorted[i][0] + '</span><span class="history-count">' + sorted[i][1] + 'x</span></div>';
+                }
+                historyBox.innerHTML = html;
             }
         }
 
@@ -1015,15 +987,18 @@
             }
 
             const templateGames = templates[templateName];
-            games = [...templateGames];
+            games = [];
+            for (let i = 0; i < templateGames.length; i++) {
+                games.push(templateGames[i]);
+            }
             playerPoints = {};
             
-            players.forEach(player => {
-                playerPoints[player] = {};
-                games.forEach(game => {
-                    playerPoints[player][game] = 0;
-                });
-            });
+            for (let i = 0; i < players.length; i++) {
+                playerPoints[players[i]] = {};
+                for (let j = 0; j < games.length; j++) {
+                    playerPoints[players[i]][games[j]] = 0;
+                }
+            }
 
             updateGamesDisplay();
             updatePlayerSelect();
@@ -1035,10 +1010,10 @@
 
         function saveData() {
             const data = {
-                players,
-                games,
-                playerPoints,
-                drawHistory
+                players: players,
+                games: games,
+                playerPoints: playerPoints,
+                drawHistory: drawHistory
             };
             localStorage.setItem('spielauswahl_data', JSON.stringify(data));
         }
@@ -1054,7 +1029,7 @@
             }
         }
 
-        window.addEventListener('keypress', (e) => {
+        window.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 if (document.activeElement.id === 'playerName') {
                     addPlayer();
