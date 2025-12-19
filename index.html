@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielauswahl Tombola</title>
+    <title>🎲 Spielauswahl Tombola</title>
+    <meta name="description" content="Zufallsauswahl für Spielegruppen - Jeder Spieler verteilt 10 Punkte auf Spiele">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spielauswahl">
     <style>
         :root {
             --color-primary: #2180a0;
@@ -288,37 +292,6 @@
             font-style: italic;
         }
 
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .tab-button {
-            background: transparent;
-            color: var(--color-text-secondary);
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-            transition: all 150ms;
-        }
-
-        .tab-button.active {
-            color: var(--color-primary);
-            border-bottom-color: var(--color-primary);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
         .history-box {
             background: #fafaf8;
             padding: 12px;
@@ -457,6 +430,7 @@
             transition: all 150ms;
             font-size: 0.85em;
             text-align: center;
+            font-weight: 500;
         }
 
         .template-btn:hover {
@@ -464,11 +438,36 @@
             color: white;
             border-color: var(--color-primary);
         }
+
+        .share-section {
+            background: rgba(33, 128, 160, 0.08);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .share-section p {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            color: var(--color-text-secondary);
+        }
+
+        .share-btn {
+            background: var(--color-primary);
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎲 Spielauswahl Tombola</h1>
+
+        <div class="share-section">
+            <p>📱 Speichere diese App auf deinem Startbildschirm:</p>
+            <p><strong>Safari:</strong> Teilen → Zum Startbildschirm</p>
+        </div>
 
         <div class="main-grid">
             <!-- Spieler Section -->
@@ -601,8 +600,8 @@
     <script>
         let players = [];
         let games = [];
-        let playerPoints = {}; // { playerName: { gameName: points } }
-        let drawHistory = []; // Array of drawn games
+        let playerPoints = {};
+        let drawHistory = [];
 
         const templates = {
             classic: ['Catan', 'Carcassonne', 'Ticket to Ride', 'Puerto Rico', 'Agricola'],
@@ -611,7 +610,6 @@
             family: ['Kniffel', 'Mensch ärgere dich nicht', 'Rommé', 'Knack', 'Wizard']
         };
 
-        // === SPIELER FUNKTIONEN ===
         function addPlayer() {
             const input = document.getElementById('playerName');
             const name = input.value.trim();
@@ -636,6 +634,7 @@
             updatePlayersDisplay();
             updatePlayerSelect();
             checkDrawButtonState();
+            saveData();
         }
 
         function removePlayer(name) {
@@ -644,6 +643,7 @@
             updatePlayersDisplay();
             updatePlayerSelect();
             checkDrawButtonState();
+            saveData();
         }
 
         function updatePlayersDisplay() {
@@ -661,7 +661,6 @@
             `).join('');
         }
 
-        // === SPIELE FUNKTIONEN ===
         function addGame() {
             const input = document.getElementById('gameName');
             const name = input.value.trim();
@@ -685,6 +684,7 @@
             input.value = '';
             updateGamesDisplay();
             checkDrawButtonState();
+            saveData();
         }
 
         function removeGame(name) {
@@ -694,6 +694,7 @@
             });
             updateGamesDisplay();
             checkDrawButtonState();
+            saveData();
         }
 
         function updateGamesDisplay() {
@@ -715,7 +716,6 @@
             }).join('');
         }
 
-        // === PUNKTE FUNKTIONEN ===
         function updatePlayerSelect() {
             const select = document.getElementById('selectedPlayer');
             const warning = document.getElementById('noPlayersWarning');
@@ -805,10 +805,11 @@
 
             alert('Punkte für ' + player + ' gespeichert!');
             updateGamesDisplay();
+            updateValidationStatus();
             checkDrawButtonState();
+            saveData();
         }
 
-        // === AUSLOSUNG FUNKTIONEN ===
         function checkDrawButtonState() {
             const button = document.getElementById('drawButton');
             const hasValidData = players.length > 0 && games.length > 0;
@@ -870,7 +871,6 @@
             return items[items.length - 1];
         }
 
-        // === VALIDIERUNG ===
         function validateAllPlayers() {
             if (players.length === 0 || games.length === 0) return false;
 
@@ -927,7 +927,6 @@
             }
         }
 
-        // === STATISTIKEN ===
         function updateStatistics() {
             const frequency = {};
             drawHistory.forEach(game => {
@@ -961,7 +960,6 @@
             }
         }
 
-        // === TEMPLATES ===
         function loadTemplate(templateName) {
             if (games.length > 0 && !confirm('Vorhandene Spiele werden ersetzt. Fortfahren?')) {
                 return;
@@ -986,7 +984,6 @@
             saveData();
         }
 
-        // === SPEICHERUNG ===
         function saveData() {
             const data = {
                 players,
@@ -1008,7 +1005,6 @@
             }
         }
 
-        // === INITIALISIERUNG ===
         window.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 if (document.activeElement.id === 'playerName') {
@@ -1024,12 +1020,6 @@
         updatePlayerSelect();
         updateValidationStatus();
         updateStatistics();
-
-        const originalSavePlayerPoints = savePlayerPoints;
-        savePlayerPoints = function() {
-            originalSavePlayerPoints.call(this);
-            updateValidationStatus();
-        };
     </script>
 </body>
 </html>
